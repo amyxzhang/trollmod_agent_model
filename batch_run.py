@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 
 fixed_params = {'num_agents': 50}
-
 variable_params = {'percent_trolls': [.1,.2,.3],
                    'percent_mods': [.1,.2,.3],
                    }
