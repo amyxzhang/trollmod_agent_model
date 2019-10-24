@@ -27,7 +27,7 @@ def network_portrayal(G):
                            'color': compute_color(agents[0]),
                            'label': None if not agents else 'Agent:{} Trolling Delta:{} Total: {}'.format(agents[0].unique_id,
                                                                                         agents[0].trolling_received_snapshot, agents[0].trolling_received),
-                           }
+                            }
                           for (node_id, agents) in G.nodes.data('agent')]
 
     portrayal['edges'] = [{'id': edge_id,
@@ -48,14 +48,12 @@ chart = ChartModule([
 
 
 model_params = {
-    "num_agents": UserSettableParameter('slider', "Number of agents", 30, 0, 100, 10,
+    "num_agents": UserSettableParameter('slider', "Number of agents", 50, 0, 100, 10,
                                         description="Choose how many total agents to include in the model"),
     "percent_trolls": UserSettableParameter('slider', "Percent trolls", .1, 0, 1.0, 0.05,
                                        description="Choose what percent trolls to include in the model"),
     "percent_mods": UserSettableParameter('slider', "Percent mods", .2, 0, 1.0, 0.05,
-                                       description="Choose what percent mods to include in the model"),
-    "mod_power": UserSettableParameter('slider', "Mod power", 10, 0, 20, 2,
-                                       description="How many items mods can remove per step")
+                                       description="Choose what percent mods to include in the model")
 }
 
 server = ModularServer(TrollModNetwork, [grid, chart], "Troll Mod Model", model_params)

@@ -4,9 +4,9 @@ from mesa.datacollection import DataCollector
 import networkx as nx
 import numpy as np
 import math
-import random
 
 from mesa.space import NetworkGrid
+
 
 def compute_avg_delta(model):
     df = model.datacollector.get_model_vars_dataframe()
@@ -25,22 +25,21 @@ def compute_troll_delta(model):
     
     return np.average(trolling_received_per_agent)
 
-
 class TrollModNetwork(Model):
     """A model with some number of trolls, mods, and regular users."""
 
-    def __init__(self, num_agents=30, percent_trolls=.10, percent_mods=.20, mod_power=10):
+    def __init__(self, num_agents=50, percent_trolls=.10, percent_mods=.20):
 
         self.num_agents = num_agents
         self.num_nodes = num_agents
         self.num_trolls = int(math.floor(float(num_agents) * percent_trolls))
         self.num_mods = int(math.floor(float(num_agents) * percent_mods))
         self.num_regular = self.num_agents - (self.num_trolls + self.num_mods)
-        self.mod_power = mod_power
         
-        self.G = nx.barabasi_albert_graph(self.num_nodes, int(round(float(self.num_nodes)*0.90)), seed=11)
+        
+#         self.G = nx.barabasi_albert_graph(self.num_nodes, int(round(float(self.num_nodes)*0.90)), seed=11)
 #         self.G = nx.barabasi_albert_graph(self.num_nodes, int(round(float(self.num_nodes)*0.10)), seed=11)
-#         self.G = nx.powerlaw_cluster_graph(self.num_nodes, int(round(float(self.num_nodes)*0.10)), p=0.9, seed=11)
+        self.G = nx.powerlaw_cluster_graph(self.num_nodes, int(round(float(self.num_nodes)*0.1)), p=0.9, seed=11)
         self.grid = NetworkGrid(self.G)
         self.schedule = RandomActivation(self)
         self.running = True
@@ -132,35 +131,15 @@ class ModUser(RegularUser):
     def block_trolling(self):
         neighbors_nodes = self.model.grid.get_neighbors(self.pos, include_center=False)
         neighbors = self.model.grid.get_cell_list_contents(neighbors_nodes)
-        
-        count = self.model.mod_power
-        
+        for neighbor in neighbors:
+            if neighbor.trolling_received > 0:
+                neighbor.trolling_received -= 1
         if self.trolling_received > 0:
-            if count >= self.trolling_received:
-                count -= self.trolling_received
-                self.trolling_received = 0
-            else:
-                self.trolling_received -= count
-                count = 0
-                
-        if count > 0:
-            random.shuffle(neighbors)
-        
-            for neighbor in neighbors:
-                if count > 0:
-                    if neighbor.trolling_received > 0:
-                        if count >= neighbor.trolling_received:
-                            count -= neighbor.trolling_received
-                            neighbor.trolling_received = 0
-                        else:
-                            neighbor.trolling_received -= count
-                            count = 0
+            self.trolling_received -= 1
                             
         
 
     def step(self):
         self.block_trolling()
         super().step()
-
-
-
+        
